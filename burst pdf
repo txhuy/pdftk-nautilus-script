@@ -1,0 +1,28 @@
+#!/bin/bash
+ifs=$IFS
+IFS='\
+'
+PDFARGUMENTS=""
+pdfdir=""
+FILES=($NAUTILUS_SCRIPT_SELECTED_FILE_PATHS)
+filename=""
+for file in $FILES
+do
+  if [ -f "$file" ]; then
+  base=${file%.*}	
+	ext=${file##*.}
+	if [ "$ext" == "pdf" ]; then
+	    PDFARGUMENTS="$PDFARGUMENTS \"$file\""
+	    filename=$(basename "$file" .pdf)
+	    filename=$(echo $filename|sed 's/ //g')
+	    pdfdir=$(dirname $file)"/"$filename
+	fi
+  fi
+done
+
+if [ -n "$PDFARGUMENTS" ]; then
+	mkdir "$pdfdir"
+	cd "$pdfdir"
+	eval pdftk "$PDFARGUMENTS" burst output "$filename"_%02d.pdf
+fi
+IFS=$ifs
